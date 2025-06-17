@@ -20,6 +20,8 @@ class SignupFields {
     return MyTextfield(
       controller: locationController,
       hintText: 'Location',
+         height: 60.0,
+  width: double.infinity, 
       icon: Icons.location_on_outlined,
       validator: (value) =>
           value == null || value.isEmpty ? 'Location is required' : null,
@@ -31,6 +33,8 @@ class SignupFields {
       controller: passwordController,
       hintText: 'Password',
       icon: Icons.lock,
+         height: 60.0,
+  width: double.infinity, 
       obscureText: true,
       validator: (value) => value == null || value.isEmpty || value.length < 6
           ? 'Password must be at least 6 characters long'
@@ -43,6 +47,8 @@ class SignupFields {
       controller: emailController,
       hintText: 'Email',
       icon: Icons.email,
+         height: 60.0,
+  width: double.infinity, 
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Email is required';
@@ -61,6 +67,8 @@ class SignupFields {
       keyboardType: TextInputType.phone,
       hintText: 'Mobile Number',
       icon: Icons.phone,
+         height: 60.0,
+  width: double.infinity, 
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Phone number is required';
@@ -77,6 +85,8 @@ class SignupFields {
       controller: nameController,
       hintText: 'Name',
       icon: Icons.person,
+         height: 60.0,
+  width: double.infinity, 
       validator: (value) =>
           value == null || value.isEmpty ? 'Name is required' : null,
     );

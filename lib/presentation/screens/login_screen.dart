@@ -287,6 +287,7 @@ class _LoginscreenState extends State<Loginscreen1> {
 */
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:quick_mart/core/services/auth_service.dart';
 import 'package:quick_mart/presentation/widgets/button.dart';
 import 'package:quick_mart/presentation/widgets/color.dart';
@@ -352,7 +353,12 @@ class _LoginscreenState extends State<Loginscreen1> {
                 ),
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.only(
+                      top: 60.0, // More space at the top
+                      left: 20.0,
+                      right: 20.0,
+                      bottom: 20.0,
+                    ),
                     child: Form(
                       key: _formKey,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -360,23 +366,23 @@ class _LoginscreenState extends State<Loginscreen1> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(height: 20),
-                          const Text(
+                          Text(
                             'Welcome back, you have been missed!',
-                            style: TextStyle(
+                            style: GoogleFonts.lato(
                               color: Colors.black54,
                               fontSize: 16,
                             ),
                           ),
                           const SizedBox(height: 25),
                           loginWidgets.username(),
-                          const SizedBox(height: 10),
                           loginWidgets.password(),
                           const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(right: 16.0), // Add right padding
+                                padding: const EdgeInsets.only(
+                                    right: 23.0), // Add right padding
                                 child: InkWell(
                                   onTap: () {
                                     Navigator.of(context).push(
@@ -399,6 +405,38 @@ class _LoginscreenState extends State<Loginscreen1> {
                             onTap: loginWidgets.login,
                             buttonText: 'Sign In',
                           ),
+                           const SizedBox(height: 35),
+                         Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 27.0), // Add horizontal padding for the divider
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Divider(
+                        thickness: 1,
+                        color: Colors.grey, // Color of the line
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        'OR',
+                        style: GoogleFonts.lato( // Using GoogleFonts for consistency
+                          color: Colors.grey,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Divider(
+                        thickness: 1,
+                        color: Colors.grey, // Color of the line
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+               const SizedBox(height: 10),
                           Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: isLoading

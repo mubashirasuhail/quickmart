@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:quick_mart/core/services/auth_service.dart';
 import 'package:quick_mart/presentation/screens/home_screen.dart';
 import 'package:quick_mart/presentation/screens/signup_screen.dart';
@@ -27,9 +28,11 @@ class LoginWidgets {
 
   Container google() {
     return Container(
+      height: 60, // Example height
+        width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey, width: 1),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -81,11 +84,12 @@ class LoginWidgets {
           height: 50,
         ),
         const SizedBox(width: 10),
-        const Text(
+        Text(
           'Quick Mart',
-          style: TextStyle(
+          style:TextStyle(
             color: Colors.white,
             fontSize: 24,
+            fontFamily: 'Librebold',
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -98,6 +102,8 @@ class LoginWidgets {
       controller: passwordController,
       hintText: 'Password',
       icon: Icons.lock,
+        height: 60.0,
+  width: double.infinity, 
       obscureText: true,
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -115,6 +121,8 @@ class LoginWidgets {
       controller: emailController,
       hintText: 'Username',
       icon: Icons.email,
+        height: 60.0,
+  width: double.infinity, 
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -130,7 +138,7 @@ class LoginWidgets {
   void login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        isLoading = true; // Show loading indicator
+        isLoading = true; 
       });
 
       final email = emailController.text.trim();

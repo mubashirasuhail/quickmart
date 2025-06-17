@@ -14,20 +14,39 @@ class Mybutton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        height: 60, 
+        width: double.infinity,
         padding: const EdgeInsets.all(20),
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 149, 178, 80), borderRadius: BorderRadius.circular(8)),
+            color:  Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(10)),
         child: Center(
           child: Text(
             buttonText,
             style: const TextStyle(
-              fontSize: 20, // Adjust the size as needed
+              fontSize: 16,
+              fontFamily: 'chakra',
+              color: Colors.white // Adjust the size as needed
               //fontWeight: FontWeight.bold
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class MyIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback pressed;
+
+  const MyIconButton({super.key, required this.icon, required this.pressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(icon),
+      onPressed: pressed,
     );
   }
 }

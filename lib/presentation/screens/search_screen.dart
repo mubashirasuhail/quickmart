@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:quick_mart/presentation/screens/product_screen.dart';
+import 'package:quick_mart/presentation/screens/product_detail.dart';
+import 'package:quick_mart/presentation/widgets/color.dart';
+// If you don't need product_screen.dart import, you can remove it.
+// import 'package:quick_mart/presentation/screens/product_screen.dart';
+
 
 class SearchScreen extends StatefulWidget {
   final String query;
@@ -48,6 +52,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 'image': doc['image'] ?? '',
                 'price': doc['price'] ?? 'N/A',
                 'id': doc.id,
+                'moreImages': (doc['moreImages'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
               })
           .toList();
 
@@ -57,6 +62,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _sortProducts(); // Apply sorting after fetching
       });
     } catch (e) {
+      debugPrint("Error searching products: $e");
       setState(() {
         isLoading = false;
       });
@@ -85,7 +91,8 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search results for "${searchController.text}"'),
+        title: Text('Results for "${searchController.text}"'),
+       // centerTitle: true, // Center the app bar title
       ),
       body: Column(
         children: [
@@ -101,6 +108,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder( // Added for consistency
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder( // Added for consistency
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppColors.darkgreen), // Highlight when focused
                 ),
               ),
             ),
@@ -140,44 +155,111 @@ class _SearchScreenState extends State<SearchScreen> {
                     : ListView.builder(
                         itemCount: searchResults.length,
                         itemBuilder: (context, index) {
-                          String imageUrl = searchResults[index]['image'];
-                          String name = searchResults[index]['productname'];
-                          String category = searchResults[index]['category'];
-                          String price = searchResults[index]['price'].toString();
+                          final Map<String, dynamic> currentProduct = searchResults[index];
 
-                          return ListTile(
-                            leading: imageUrl.isNotEmpty
-                                ? Image.network(
-                                    imageUrl,
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        Image.asset('assets/images/placeholder.png'),
-                                  )
-                                : Image.asset('assets/images/placeholder.png', width: 50, height: 50, fit: BoxFit.cover,),
-                            title: Text(name),
-                            subtitle: Text('Category: $category\nPrice: ₹ $price'),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProductScreen(
-                                    category: category,
+                          String productId = currentProduct['id'];
+                          String productName = currentProduct['productname'];
+                          String productImage = currentProduct['image'];
+                          String productDescription = currentProduct['description'];
+                          double productPrice = double.tryParse(currentProduct['price'].toString()) ?? 0.0;
+                          List<String> moreImages = currentProduct['moreImages'] is List
+                              ? List<String>.from(currentProduct['moreImages'])
+                              : [];
+
+
+                          return Card( // Changed from ListTile to Card
+                            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            elevation: 4, // Add some shadow
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Rounded corners
+                            child: InkWell( // Make the entire card tappable
+                              borderRadius: BorderRadius.circular(12), // Match card border
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProductDetailScreen(
+                                      productId: productId,
+                                      productName: productName,
+                                      productImage: productImage,
+                                      productDescription: productDescription,
+                                      productPrice: productPrice,
+                                      moreImages: moreImages,
+                                      
+                                    ),
                                   ),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Product Image
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: Container( // Using Container for placeholder background if image is empty
+                                        color: Colors.grey[200], // Placeholder color
+                                        width: 90, // Larger image
+                                        height: 80,
+                                        child: productImage.isNotEmpty
+                                            ? Image.network(
+                                                productImage,
+                                                fit: BoxFit.cover,
+                                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                                  if (loadingProgress == null) return child;
+                                                  return Center(
+                                                    child: CircularProgressIndicator(
+                                                      value: loadingProgress.expectedTotalBytes != null
+                                                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                          : null,
+                                                    ),
+                                                  );
+                                                },
+                                                errorBuilder: (context, error, stackTrace) =>
+                                                    Image.asset('assets/images/placeholder.png', fit: BoxFit.cover),
+                                              )
+                                            : Image.asset('assets/images/placeholder.png', fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 15), // Spacing between image and text
+
+                                    // Product Details
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            productName,
+                                            style: const TextStyle(
+                                              fontSize: 17, // Slightly larger font
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 6), // Spacing
+                                          Text(
+                                            '₹ ${productPrice.toStringAsFixed(2)}', // Format price to 2 decimal places
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green, // Highlight price with green
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6), // Spacing
+                                      /*    Text(
+                                            productDescription,
+                                            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                                            maxLines: 2, // Show a snippet of description
+                                            overflow: TextOverflow.ellipsis,
+                                          ),*/
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
+                              ),
+                            ),
                           );
                         },
                       ),

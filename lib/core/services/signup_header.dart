@@ -16,6 +16,7 @@ Padding headerPart() {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
+                        fontFamily: 'Librebold',
                         fontWeight: FontWeight.bold,
                       ),
                     ),

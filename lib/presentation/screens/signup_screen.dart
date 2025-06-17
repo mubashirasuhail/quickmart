@@ -304,7 +304,11 @@ class _SignupState extends State<Signup> {
                           topRight: Radius.circular(30),
                         ),
                       ),
-                      padding: const EdgeInsets.all(20),
+                     padding: const EdgeInsets.only(
+                      top: 70.0, // More space at the top
+                      left: 20.0,
+                      right: 20.0,
+                      bottom: 150,   ),
                       child: Form(
                         key: _formKey,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -318,6 +322,7 @@ class _SignupState extends State<Signup> {
                             fields.location(),
                             const SizedBox(height: 20),
                             Mybutton(
+                             
                               onTap: logic.signup,
                                 
                               buttonText: 'Sign Up',

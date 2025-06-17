@@ -26,14 +26,17 @@ class MyApp extends StatelessWidget {
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:quick_mart/presentation/screens/splash_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quick_mart/presentation/bloc/cart_bloc.dart'; 
+import 'package:quick_mart/presentation/bloc/cart_bloc.dart';
+import 'package:quick_mart/presentation/widgets/color.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+   //Stripe.publishableKey =
+      //'pk_test_51REFCWAT4p0LUULGhfMvbI8qSi6SOZ3MfwKGGsooWzSI99bcf9uQof2MdZrJRKI0n8Yg0IiugPXOGAxrs5nQgydy00GjjPv02R'; 
  runApp(
     BlocProvider(
       create: (context) => CartBloc(), // Provide CartBloc here
@@ -53,9 +56,9 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Quick Mart',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.darkgreen),
         useMaterial3: true,
       ),
       home: const SplashScreen1(),

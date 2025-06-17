@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quick_mart/presentation/bloc/cart_bloc.dart';
 import 'package:quick_mart/presentation/bloc/cart_event.dart';
+import 'package:quick_mart/presentation/bloc/cart_state.dart';
 import 'package:quick_mart/presentation/screens/cart_screen.dart';
+
+import 'package:quick_mart/presentation/widgets/color.dart';
+// Make sure you import your CartItem model
 
 class ProductDetailScreen extends StatelessWidget {
   final String productId;
@@ -22,6 +26,8 @@ class ProductDetailScreen extends StatelessWidget {
     required this.moreImages,
   });
 
+  static const double _deliveryCharge = 50.0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,21 +36,23 @@ class ProductDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(
-              productImage,
-              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset('assets/images/placeholder.png');
-              },
+            Center(
+              child: Image.network(
+                productImage,
+                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset('assets/images/placeholder.png');
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -77,7 +85,7 @@ class ProductDetailScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: SizedBox(
-                height: 200,
+                height: 150,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: moreImages.length,
@@ -86,18 +94,21 @@ class ProductDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Image.network(
                         moreImages[index],
+                        width: 150,
+                        fit: BoxFit.cover,
                         loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                           if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
+                          return const Center(
+                            child: CircularProgressIndicator(),
                           );
                         },
                         errorBuilder: (context, error, stackTrace) {
-                          return Image.asset('assets/images/placeholder.png');
+                          return Image.asset(
+                            'assets/images/placeholder.png',
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.contain,
+                          );
                         },
                       ),
                     );
@@ -105,32 +116,110 @@ class ProductDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.read<CartBloc>().add(AddToCartEvent(
-                          productId: productId,
-                          productName: productName,
-                          productImage: productImage,
-                          productPrice: productPrice,
-                        ));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Added to cart')),
-                    );
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CartPage()),
-                    );
-                  },
-                  child: const Text('Add to Cart'),
-                ),
-              ),
-            ),
+            const SizedBox(height: 100),
           ],
         ),
+      ),
+      bottomNavigationBar: BlocBuilder<CartBloc, CartState>(
+        builder: (context, state) {
+          final subtotal = state.cartItems.fold<double>(
+              0, (sum, item) => sum + (item.productPrice * item.quantity));
+          final totalAmountWithDelivery = subtotal + _deliveryCharge;
+
+          return Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.4),
+                  spreadRadius: 3,
+                  blurRadius: 7,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                 //   const Text('Amount:', style: TextStyle(fontSize: 18, color: Colors.black54)),
+                    Text(
+                   
+                          '₹${productPrice.toStringAsFixed(2)}' ,
+                         
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkgreen),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Option 1: Use firstWhereOrNull from collection package
+                    // If you add the 'collection' package, this is the cleanest.
+                    // final existingCartItem = state.cartItems.firstWhereOrNull(
+                    //   (item) => item.productId == productId,
+                    // );
+
+                    // Option 2 (Current Fix): Explicitly check for an item and return null if not found
+                    CartItem? existingCartItem; // Declare as nullable
+                    try {
+                      existingCartItem = state.cartItems.firstWhere(
+                        (item) => item.productId == productId,
+                      );
+                    } catch (e) {
+                      // If firstWhere doesn't find anything, it throws a StateError.
+                      // We catch it and existingCartItem remains null.
+                    }
+
+                    if (existingCartItem != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CartPage()),
+                      );
+                    } else {
+                        context.read<CartBloc>().add(AddToCartEvent(
+                            productId: productId,
+                            productName: productName,
+                            productImage: productImage,
+                            productPrice: productPrice,
+                          ));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Added to cart')),
+                      );
+                    
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) => const CartPage()),
+                      // );
+                    }
+                  },
+                   
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: BlocBuilder<CartBloc, CartState>(
+                    builder: (context, cartState) {
+                      final bool isInCart = cartState.cartItems.any((item) => item.productId == productId);
+                      return Text(
+                        isInCart ? 'Go to Cart' : 'Add to Cart',
+                        style: const TextStyle(fontSize: 15),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
